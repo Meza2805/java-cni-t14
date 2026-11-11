@@ -1,0 +1,169 @@
+### =====================================================
+### CRUD de Productos - pruebas de endpoints
+### Requiere la extension "REST Client" de VS Code:
+### aparece "Send Request" encima de cada peticion.
+### =====================================================
+
+@baseUrl = http://localhost:8080/api/productos
+
+### 1) CREATE - Insertar un producto  (responde 201 Created)
+POST {{baseUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Teclado",
+  "precio": 25.5
+}
+
+### 1b) CREATE - Insertar otro producto
+POST {{baseUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Mouse",
+  "precio": 10
+}
+
+### 2) READ - Obtener todos los productos  (200 OK)
+GET {{baseUrl}}/listar
+
+### 3) READ - Obtener un producto por id  (200 OK)
+GET {{baseUrl}}/obtener/1
+
+### 3b) READ - Obtener un id que no existe  (404 Not Found)
+GET {{baseUrl}}/obtener/999
+
+### 4) UPDATE - Actualizar el producto 1  (200 OK)
+PUT {{baseUrl}}/actualizar/1
+Content-Type: application/json
+
+{
+  "nombre": "Teclado mecanico",
+  "precio": 40
+}
+
+### 5) DELETE - Eliminar el producto 2  (204 No Content)
+DELETE {{baseUrl}}/eliminar/2
+
+### 6) VALIDACION - Datos invalidos  (400 Bad Request)
+### nombre vacio (@NotBlank) y precio negativo (@PositiveOrZero)
+POST {{baseUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "",
+  "precio": -5
+}
+
+
+### =====================================================
+### CRUD de Categorias
+### =====================================================
+
+@catUrl = http://localhost:8080/api/categorias
+
+### Crear categoria  (201)
+POST {{catUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Perifericos",
+  "descripcion": "Teclados, mouse, audifonos"
+}
+
+### Crear categoria con nombre repetido  (409 Conflict)
+POST {{catUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Perifericos"
+}
+
+### Listar categorias  (200)
+GET {{catUrl}}/listar
+
+### Obtener categoria por id  (200 / 404)
+GET {{catUrl}}/obtener/1
+
+### Actualizar categoria  (200)
+PUT {{catUrl}}/actualizar/1
+Content-Type: application/json
+
+{
+  "nombre": "Perifericos USB",
+  "descripcion": "Accesorios con conexion USB"
+}
+
+### Eliminar categoria  (204)
+DELETE {{catUrl}}/eliminar/1
+
+
+### =====================================================
+### CRUD de Clientes
+### =====================================================
+
+@cliUrl = http://localhost:8080/api/clientes
+
+### Crear cliente  (201) - "activo" no se envia: queda en true
+POST {{cliUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Ana Perez",
+  "email": "ana@correo.com",
+  "edad": 25
+}
+
+### Crear cliente inactivo  (201)
+POST {{cliUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Luis Soto",
+  "email": "luis@correo.com",
+  "edad": 40,
+  "activo": false
+}
+
+### Crear cliente con email repetido  (409 Conflict)
+POST {{cliUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Otra Ana",
+  "email": "ana@correo.com",
+  "edad": 30
+}
+
+### Crear cliente invalido  (400) - email mal escrito y menor de edad
+POST {{cliUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Pedro",
+  "email": "pedro-sin-arroba",
+  "edad": 15
+}
+
+### Listar todos los clientes  (200)
+GET {{cliUrl}}/listar
+
+### Listar solo clientes activos  (200)
+GET {{cliUrl}}/activos
+
+### Obtener cliente por id  (200 / 404)
+GET {{cliUrl}}/obtener/1
+
+### Actualizar cliente  (200)
+PUT {{cliUrl}}/actualizar/1
+Content-Type: application/json
+
+{
+  "nombre": "Ana Perez Rojas",
+  "email": "ana.perez@correo.com",
+  "edad": 26,
+  "activo": false
+}
+
+### Eliminar cliente  (204)
+DELETE {{cliUrl}}/eliminar/2
