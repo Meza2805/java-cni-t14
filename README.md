@@ -24,6 +24,32 @@ No hay que instalar SQLite: la base de datos es un archivo (`demo.db`) que se cr
 4. La API queda disponible en `http://localhost:8080`.
 5. Abre `productos.http` y haz clic en **Send Request** sobre cada petición.
 
+## Cambiar de base de datos (perfiles)
+
+Por defecto la app usa **SQLite**. Para usar otro motor se activa un **perfil de Spring**:
+Spring lee `application.properties` y, encima, el archivo del perfil (`application-<perfil>.properties`),
+cuyos valores reemplazan a los de SQLite.
+
+Formas de activar un perfil:
+
+- En `application.properties`, descomentando la línea `spring.profiles.active=...`
+- Desde la terminal: `mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=mysql`
+- Con la variable de entorno `SPRING_PROFILES_ACTIVE=mysql`
+
+El usuario, la contraseña, el host, el puerto y el nombre de la base se pueden cambiar con las variables
+de entorno `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` y `DB_NAME`, sin tocar el código.
+
+### MySQL (perfil `mysql`)
+
+| Dato | Valor por defecto |
+|---|---|
+| Archivo | `src/main/resources/application-mysql.properties` |
+| Driver | `mysql-connector-j` |
+| URL | `jdbc:mysql://localhost:3306/crud_demo` |
+| Usuario / contraseña | `root` / `root` |
+
+La base `crud_demo` se crea sola gracias a `createDatabaseIfNotExist=true`, y las tablas las crea Hibernate.
+
 ## Estructura
 
 ```
