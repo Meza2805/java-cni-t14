@@ -34,8 +34,17 @@ src/main/java/com/example/demo
 │   ├── ProductoRepository.java  Acceso a la BD (Spring genera el SQL)
 │   └── ProductoController.java  Endpoints REST
 ├── categoria/                 Mismo patrón: entidad, repositorio y controlador
-└── cliente/                   Mismo patrón: entidad, repositorio y controlador
+├── cliente/                   Mismo patrón: entidad, repositorio y controlador
+└── config/
+    └── DatosIniciales.java    Inserta datos de ejemplo al arrancar
 ```
+
+### Datos de ejemplo
+
+Al arrancar la app, `DatosIniciales.java` inserta **5 categorías** y **5 clientes** de ejemplo
+(uno de ellos inactivo), pero **solo si la tabla está vacía**. Así se pueden probar los endpoints
+`GET` desde el primer momento sin duplicar datos en cada arranque.
+Para volver a empezar desde cero, detén la app y borra el archivo `demo.db`.
 
 Flujo de una petición:
 
