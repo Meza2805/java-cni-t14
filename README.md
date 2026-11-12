@@ -50,6 +50,25 @@ de entorno `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` y `DB_NAME`, sin tocar
 
 La base `crud_demo` se crea sola gracias a `createDatabaseIfNotExist=true`, y las tablas las crea Hibernate.
 
+### SQL Server (perfil `sqlserver`)
+
+| Dato | Valor por defecto |
+|---|---|
+| Archivo | `src/main/resources/application-sqlserver.properties` |
+| Driver | `mssql-jdbc` |
+| URL | `jdbc:sqlserver://localhost:1433;databaseName=crud_demo` |
+| Usuario / contraseña | `sa` / `YourStrong!Passw0rd` |
+
+SQL Server **no** crea la base sola. Antes de arrancar la app, ejecuta en SQL Server Management Studio
+(o en Azure Data Studio):
+
+```sql
+CREATE DATABASE crud_demo;
+```
+
+Las tablas sí las crea Hibernate. Requisitos: la autenticación de SQL Server (usuario y contraseña)
+debe estar habilitada y TCP/IP activado en el puerto 1433 (SQL Server Configuration Manager).
+
 ## Estructura
 
 ```
