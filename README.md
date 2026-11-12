@@ -1,157 +1,83 @@
-<div align="center">
+# CRUD con Spring Boot + SQLite
 
-<img src="assets/banner_curso_backend_java.png" alt="Fundamentos de Desarrollo Backend con Java – Temporada XIV · CI Nicaragua" width="100%">
+Proyecto de ejemplo de una API REST con **Spring Boot**, **Spring Data JPA** y una base de datos **SQLite**.
+Tiene tres entidades (Producto, Categoria y Cliente), cada una con su CRUD completo: crear, leer, actualizar y eliminar.
+Todo el código está comentado línea por línea.
 
-# ☕ Fundamentos de Desarrollo Backend con Java
+## Requisitos
 
-**Temporada XIV · CI Nicaragua · 2026**
+- **JDK 21** o superior
+- **VS Code** con el *Extension Pack for Java* (o IntelliJ IDEA)
+- Extensión **REST Client** de VS Code para probar los endpoints (o Postman)
 
-![Java](https://img.shields.io/badge/Java-17%2B-ee7a2a?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-1d63b3?style=for-the-badge&logo=mysql&logoColor=white)
-![VS Code](https://img.shields.io/badge/VS_Code-0b2a55?style=for-the-badge&logo=visualstudiocode&logoColor=white)
+No hay que instalar SQLite: la base de datos es un archivo (`demo.db`) que se crea solo al arrancar la app.
 
-![Duración](https://img.shields.io/badge/duración-30_horas-f7c948?style=flat-square)
-![Encuentros](https://img.shields.io/badge/encuentros-12-f7c948?style=flat-square)
-![Modalidad](https://img.shields.io/badge/modo-Habilitación-f7c948?style=flat-square)
-![Estado](https://img.shields.io/badge/estado-en_curso-e2463a?style=flat-square)
+## Cómo ejecutarlo
 
-</div>
+1. Descarga la rama:
+   ```bash
+   git clone -b clase-springboot-crud-sqlite https://github.com/Meza2805/java-cni-t14.git
+   ```
+2. Abre la carpeta `java-cni-t14` (la raíz del repositorio) en VS Code.
+3. Ejecuta `DemoApplication.java` con el botón ▶ **Run**,
+   o desde la terminal: `./mvnw spring-boot:run` (en Windows: `mvnw.cmd spring-boot:run`).
+4. La API queda disponible en `http://localhost:8080`.
+5. Abre `productos.http` y haz clic en **Send Request** sobre cada petición.
 
----
-
-## 📌 Sobre el curso
-
-Repositorio oficial del curso **Fundamentos de Desarrollo Backend con Java**, impartido en el
-**Centro Nacional de Innovación y Tecnología Francisco "El Chele" Moreno (CI Nicaragua)**.
-
-Aquí se publica el código de **cada clase**, con su historial de cambios, para que puedas repasar,
-comparar tu trabajo y avanzar a tu ritmo.
-
-> 🎯 **Competencia general:** Desarrollar aplicaciones web haciendo uso de frameworks para backend.
-
----
-
-## 🗓️ Calendario de encuentros
-
-**Martes y jueves · 6 semanas · del 13 de octubre al 19 de noviembre de 2026**
-
-| Semana | Clase | Fecha | Unidad | Tema |
-|:---:|:---:|:---|:---:|:---|
-| 1 | 01 | Mar 13 oct | I | Configuración del entorno de desarrollo · Tipos de datos y variables |
-| 1 | 02 | Jue 15 oct | I | Estructuras de control en Java |
-| 2 | 03 | Mar 20 oct | I | Programación orientada a objetos |
-| 2 | 04 | Jue 22 oct | I | Encapsulamiento, herencia y polimorfismo |
-| 3 | 05 | Mar 27 oct | II | Introducción a Spring Framework |
-| 3 | 06 | Jue 29 oct | II | APIs RESTful |
-| 4 | 07 | Mar 3 nov | II | Conexión y configuración de bases de datos |
-| 4 | 08 | Jue 5 nov | II | Pruebas y depuración en el desarrollo backend |
-| 5 | 09 | Mar 10 nov | III | Optimización de consultas y de bases de datos |
-| 5 | 10 | Jue 12 nov | III | Caching de datos |
-| 6 | 11 | Mar 17 nov | III | Escalabilidad horizontal y vertical · Balanceo de carga y clustering |
-| 6 | 12 | Jue 19 nov | — | 🏁 Proyecto final y cierre |
-
----
-
-## 🧭 Ruta de aprendizaje
+## Estructura
 
 ```
- Unidad I                    Unidad II                     Unidad III
- Fundamentos de Java   ──▶   Desarrollo Backend      ──▶   Optimización y
- POO · Control · Datos       Spring · REST · BD · Tests    escalabilidad
+src/main/java/com/example/demo
+├── DemoApplication.java       Punto de entrada de la aplicación
+├── producto/
+│   ├── Producto.java          Entidad  -> tabla "productos"
+│   ├── ProductoRepository.java  Acceso a la BD (Spring genera el SQL)
+│   └── ProductoController.java  Endpoints REST
+├── categoria/                 Mismo patrón: entidad, repositorio y controlador
+└── cliente/                   Mismo patrón: entidad, repositorio y controlador
 ```
 
-<details>
-<summary><b>Unidad I · Fundamentos de Java</b></summary>
-
-- Configuración del entorno de desarrollo de Java
-- Tipos de datos y variables
-- Estructuras de control
-- Programación orientada a objetos
-- Encapsulamiento, herencia y polimorfismo
-
-</details>
-
-<details>
-<summary><b>Unidad II · Desarrollo Backend con Java</b></summary>
-
-- Spring Framework
-- APIs RESTful
-- Conexión y configuración de bases de datos
-- Pruebas y depuración
-
-</details>
-
-<details>
-<summary><b>Unidad III · Optimización y escalabilidad</b></summary>
-
-- Optimización de consultas y de bases de datos
-- Caching de datos
-- Escalabilidad horizontal y vertical
-- Balanceo de carga y clustering
-
-</details>
-
----
-
-## 📂 Estructura del repositorio
+Flujo de una petición:
 
 ```
-📦 curso-backend-java
- ┣ 📂 assets/          → imágenes y recursos del README
- ┣ 📂 clase-01/        → código y notas de cada encuentro
- ┣ 📂 clase-02/
- ┣ 📂 ...
- ┣ 📂 proyecto-final/
- ┗ 📜 README.md
+Cliente (Postman / REST Client)  →  Controller  →  Repository  →  SQLite (demo.db)
 ```
 
-Cada carpeta `clase-XX` incluye su propio `README.md` con los objetivos de la clase, el código
-trabajado y los ejercicios propuestos.
+## Endpoints
 
----
+| Operación | Método | Productos | Categorías | Clientes |
+|---|---|---|---|---|
+| Listar todos | GET | `/api/productos/listar` | `/api/categorias/listar` | `/api/clientes/listar` |
+| Obtener uno | GET | `/api/productos/obtener/{id}` | `/api/categorias/obtener/{id}` | `/api/clientes/obtener/{id}` |
+| Crear | POST | `/api/productos/crear` | `/api/categorias/crear` | `/api/clientes/crear` |
+| Actualizar | PUT | `/api/productos/actualizar/{id}` | `/api/categorias/actualizar/{id}` | `/api/clientes/actualizar/{id}` |
+| Eliminar | DELETE | `/api/productos/eliminar/{id}` | `/api/categorias/eliminar/{id}` | `/api/clientes/eliminar/{id}` |
+| Solo activos | GET | — | — | `/api/clientes/activos` |
 
-## 🛠️ Herramientas
+### Códigos de respuesta
 
-| Herramienta | Uso |
+| Código | Significado | Cuándo aparece |
+|---|---|---|
+| 200 OK | Todo bien | Listar, obtener, actualizar |
+| 201 Created | Recurso creado | Crear |
+| 204 No Content | Borrado sin cuerpo | Eliminar |
+| 400 Bad Request | Datos inválidos | Falla una validación (`@NotBlank`, `@Email`, `@Min`...) |
+| 404 Not Found | No existe | El `id` no está en la tabla |
+| 409 Conflict | Duplicado | Nombre de categoría o email de cliente repetido |
+
+## Dependencias principales (`pom.xml`)
+
+| Dependencia | Para qué sirve |
 |---|---|
-| [JDK 17 o superior](https://adoptium.net/) | Compilar y ejecutar Java |
-| [Visual Studio Code](https://code.visualstudio.com/) + [Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) | Editor de código |
-| [MySQL Workbench](https://dev.mysql.com/downloads/workbench/) | Base de datos |
-| [Git](https://git-scm.com/) | Control de versiones |
+| `spring-boot-starter-webmvc` | Crear los endpoints REST |
+| `spring-boot-starter-data-jpa` | Entidades y repositorios (Hibernate) |
+| `sqlite-jdbc` | Driver para conectarse a SQLite |
+| `hibernate-community-dialects` | Le enseña a Hibernate a generar SQL para SQLite |
+| `spring-boot-starter-validation` | Validaciones: `@NotBlank`, `@Email`, `@Min`... |
+| `lombok` | Genera getters, setters y constructores |
 
----
+## Ejercicio propuesto
 
-## 🚀 Cómo usar este repositorio
-
-```bash
-# 1. Clona el repositorio
-git clone <URL-de-este-repositorio>
-
-# 2. Entra a la carpeta
-cd curso-backend-java
-
-# 3. Antes de cada clase, trae los cambios nuevos
-git pull
-```
-
----
-
-## ✅ Requisitos
-
-- 3er año aprobado
-- 14 años cumplidos
-- Conocimientos básicos en programación
-
----
-
-<div align="center">
-
-## 👨‍🏫 Facilitador
-
-**Marvin Rafael Meza Pineda**<br>
-Centro Nacional de Innovación y Tecnología Francisco "El Chele" Moreno · CI Nicaragua
-
-<sub>Hecho con ☕ y mucho `System.out.println()` · Temporada XIV · 2026</sub>
-
-</div>
+El chequeo de duplicados (nombre de categoría y email de cliente) solo se hace al **crear**.
+Agrega la misma validación al endpoint **actualizar**, para que responda `409 Conflict`
+en lugar de un error `500` cuando se intente usar un nombre o email que ya existe.
