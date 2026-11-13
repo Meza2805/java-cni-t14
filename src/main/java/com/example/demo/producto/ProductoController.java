@@ -3,6 +3,8 @@ package com.example.demo.producto;
 
 import com.example.demo.categoria.Categoria;           // Entidad relacionada
 import com.example.demo.categoria.CategoriaRepository; // Para buscar la categoria por id
+import com.example.demo.cliente.Cliente;               // Entidad relacionada (favoritos)
+import com.example.demo.cliente.ClienteRepository;     // Para buscar los clientes que tienen el producto como favorito
 import jakarta.validation.Valid;                       // Activa las validaciones de la entidad (@NotBlank, etc.)
 import lombok.RequiredArgsConstructor;                 // Lombok: constructor para los campos "final"
 import org.springframework.http.ResponseEntity;        // Respuesta HTTP completa: codigo de estado + cuerpo
@@ -18,6 +20,7 @@ public class ProductoController {
 
     private final ProductoRepository repo;               // Acceso a la tabla "productos"
     private final CategoriaRepository categoriaRepo;     // Acceso a la tabla "categorias" (para la relacion)
+    private final ClienteRepository clienteRepo;         // Acceso a la tabla "clientes" (para los favoritos)
 
     // ===================== READ: listar todos =====================
     @GetMapping("/listar")                 // GET /api/productos/listar
@@ -75,6 +78,14 @@ public class ProductoController {
         if (!repo.existsById(id)) {                          // Si no existe ese id...
             return ResponseEntity.notFound().build();        // ...404 Not Found
         }
+        // Producto NO es el dueno de la relacion de favoritos (lo es Cliente).
+        // Antes de borrarlo hay que sacarlo de los favoritos de cada cliente; si no,
+        // la tabla cliente_favoritos quedaria apuntando a un producto que ya no existe
+        // (MySQL y SQL Server lanzarian un error de clave foranea).
+        for (Cliente cliente : clienteRepo.findByFavoritosId(id)) {
+            cliente.getFavoritos().removeIf(p -> p.getId().equals(id)); // DELETE FROM cliente_favoritos WHERE ...
+            clienteRepo.save(cliente);
+        }
         repo.deleteById(id);                                 // DELETE FROM productos WHERE id = ?
         return ResponseEntity.noContent().build();           // 204 No Content: borrado OK, sin cuerpo
     }
@@ -114,5 +125,18 @@ public class ProductoController {
     @GetMapping("/sin-categoria")                              // GET /api/productos/sin-categoria
     public List<Producto> sinCategoria() {
         return repo.findByCategoriaIsNull();                   // SELECT * FROM productos WHERE categoria_id IS NULL
+    }
+
+    // =====================================================================
+    //          RELACION  Producto (muchos) <-> Cliente (muchos): FAVORITOS
+    // =====================================================================
+
+    // ===================== Clientes que tienen este producto como favorito =====================
+    @GetMapping("/{id}/clientes")                                        // GET /api/productos/1/clientes
+    public ResponseEntity<List<Cliente>> clientes(@PathVariable Long id) {
+        if (!repo.existsById(id)) {                                      // Si el producto no existe -> 404
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(clienteRepo.findByFavoritosId(id));    // JOIN con la tabla cliente_favoritos
     }
 }

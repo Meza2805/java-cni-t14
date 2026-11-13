@@ -10,6 +10,7 @@ import com.example.demo.producto.ProductoRepository;    // Acceso a la tabla "pr
 import org.springframework.boot.CommandLineRunner;      // Codigo que se ejecuta al arrancar la app
 import org.springframework.context.annotation.Bean;     // Registra un objeto administrado por Spring
 import org.springframework.context.annotation.Configuration; // Clase de configuracion
+import org.springframework.transaction.support.TransactionTemplate; // Ejecuta codigo dentro de una transaccion
 
 import java.util.List; // Para crear listas de datos
 
@@ -22,11 +23,15 @@ public class DatosIniciales {
     @Bean
     CommandLineRunner cargarDatos(CategoriaRepository categoriaRepo,
                                   ClienteRepository clienteRepo,
-                                  ProductoRepository productoRepo) {
+                                  ProductoRepository productoRepo,
+                                  TransactionTemplate tx) {
         return args -> {
             cargarCategorias(categoriaRepo);
             cargarClientes(clienteRepo);
             cargarProductos(productoRepo, categoriaRepo);
+            // Los favoritos son LAZY: para leerlos y modificarlos la sesion de JPA debe seguir abierta.
+            // tx.executeWithoutResult(...) ejecuta el bloque dentro de UNA transaccion.
+            tx.executeWithoutResult(estado -> cargarFavoritos(clienteRepo, productoRepo));
         };
     }
 
@@ -81,5 +86,30 @@ public class DatosIniciales {
                 new Producto(null, "Producto sin categoria", 10.0, null) // categoria_id = NULL
         ));
         System.out.println(">>> Productos de ejemplo insertados: " + repo.count());
+    }
+
+    // ===================== Datos de ejemplo: FAVORITOS (relacion muchos a muchos) =====================
+    private void cargarFavoritos(ClienteRepository clienteRepo, ProductoRepository productoRepo) {
+        if (clienteRepo.existsByFavoritosIsNotEmpty()) { // Si algun cliente ya tiene favoritos, no hacemos nada
+            return;
+        }
+        agregarFavoritos(clienteRepo, productoRepo, "ana.lopez@correo.com", "Laptop", "Audifonos", "Clean Code");
+        agregarFavoritos(clienteRepo, productoRepo, "carlos.perez@correo.com", "Balon de futbol", "Pesas 5 kg");
+        agregarFavoritos(clienteRepo, productoRepo, "maria.gonzalez@correo.com", "Laptop", "Licuadora");
+        agregarFavoritos(clienteRepo, productoRepo, "lucia.ramirez@correo.com", "Clean Code");
+        System.out.println(">>> Favoritos de ejemplo insertados");
+    }
+
+    // Busca el cliente por email y le agrega los productos indicados por nombre (si existen)
+    private void agregarFavoritos(ClienteRepository clienteRepo, ProductoRepository productoRepo,
+                                  String email, String... nombresProductos) {
+        clienteRepo.findByEmail(email)                      // SELECT * FROM clientes WHERE email = ?
+                .ifPresent(cliente -> {
+                    for (String nombre : nombresProductos) {
+                        productoRepo.findFirstByNombre(nombre)
+                                .ifPresent(cliente.getFavoritos()::add); // Agrega a la lista en Java
+                    }
+                    clienteRepo.save(cliente);              // INSERT INTO cliente_favoritos ... (una fila por producto)
+                });
     }
 }

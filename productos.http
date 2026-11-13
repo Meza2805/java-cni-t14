@@ -211,3 +211,29 @@ GET {{catUrl}}/1/productos
 
 ### Eliminar una categoria que tiene productos  (409 Conflict)
 DELETE {{catUrl}}/eliminar/1
+
+
+### =====================================================
+### RELACION Cliente (muchos) <-> Producto (muchos): FAVORITOS
+### @ManyToMany + @JoinTable en Cliente
+### Tabla intermedia: cliente_favoritos (cliente_id, producto_id)
+### =====================================================
+
+### Ver un cliente: ahora incluye su lista de "favoritos"  (200)
+GET {{cliUrl}}/obtener/1
+
+### Ver solo los favoritos de un cliente  (200 / 404)
+GET {{cliUrl}}/1/favoritos
+
+### Agregar un producto a los favoritos de un cliente  (200)
+### POST /api/clientes/{id}/favoritos/{productoId}
+POST {{cliUrl}}/2/favoritos/3
+
+### Agregar el mismo producto otra vez  (409 Conflict)
+POST {{cliUrl}}/2/favoritos/3
+
+### Quitar un producto de favoritos  (204)
+DELETE {{cliUrl}}/2/favoritos/3
+
+### Lado contrario: que clientes tienen este producto como favorito  (200)
+GET {{baseUrl}}/1/clientes

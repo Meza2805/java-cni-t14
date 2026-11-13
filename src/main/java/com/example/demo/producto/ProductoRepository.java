@@ -3,6 +3,7 @@ package com.example.demo.producto;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 // JpaRepository ya trae save, findAll, findById, deleteById, etc.
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
@@ -17,4 +18,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     // SELECT count(*) > 0 FROM productos WHERE categoria_id = ?
     boolean existsByCategoriaId(Long categoriaId);
+
+    // SELECT * FROM productos WHERE nombre = ? LIMIT 1  (se usa al cargar los datos de ejemplo)
+    Optional<Producto> findFirstByNombre(String nombre);
 }
