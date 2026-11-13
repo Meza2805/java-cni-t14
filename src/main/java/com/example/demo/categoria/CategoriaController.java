@@ -1,7 +1,9 @@
 // Paquete donde vive la clase
 package com.example.demo.categoria;
 
-import jakarta.validation.Valid;                   // Activa las validaciones de la entidad
+import com.example.demo.producto.Producto;           // Entidad relacionada
+import com.example.demo.producto.ProductoRepository; // Para consultar los productos de una categoria
+import jakarta.validation.Valid;                 // Activa las validaciones de la entidad
 import lombok.RequiredArgsConstructor;             // Lombok: constructor para los campos "final"
 import org.springframework.http.HttpStatus;        // Codigos HTTP con nombre (CONFLICT = 409)
 import org.springframework.http.ResponseEntity;    // Respuesta HTTP: codigo de estado + cuerpo
@@ -15,7 +17,8 @@ import java.util.List; // Lista de categorias
 @RequiredArgsConstructor            // Spring inyecta el repositorio por constructor
 public class CategoriaController {
 
-    private final CategoriaRepository repo; // Acceso a la tabla "categorias"
+    private final CategoriaRepository repo;          // Acceso a la tabla "categorias"
+    private final ProductoRepository productoRepo;   // Acceso a la tabla "productos" (para la relacion)
 
     // ===================== READ: listar todas =====================
     @GetMapping("/listar")              // GET /api/categorias/listar
@@ -60,11 +63,31 @@ public class CategoriaController {
 
     // ===================== DELETE: eliminar =====================
     @DeleteMapping("/eliminar/{id}")                              // DELETE /api/categorias/eliminar/1
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) { // Sin cuerpo en la respuesta
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {    // <?>: sin cuerpo o con mensaje de error
         if (!repo.existsById(id)) {                               // Si no existe...
             return ResponseEntity.notFound().build();             // ...404
         }
+        // INTEGRIDAD REFERENCIAL: si hay productos que apuntan a esta categoria (categoria_id = id),
+        // borrarla dejaria esas claves foraneas "huerfanas". MySQL y SQL Server lo impiden con un error;
+        // SQLite, por defecto, no revisa las FK. Por eso lo validamos aqui y respondemos 409.
+        if (productoRepo.existsByCategoriaId(id)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No se puede eliminar: la categoria tiene productos. Quitalos o cambialos de categoria primero.");
+        }
         repo.deleteById(id);                                      // DELETE FROM categorias WHERE id = ?
         return ResponseEntity.noContent().build();                // 204 No Content
+    }
+
+    // =====================================================================
+    //                RELACION  Categoria (una) -> Productos (muchos)
+    // =====================================================================
+
+    // ===================== Productos de una categoria =====================
+    @GetMapping("/{id}/productos")                                          // GET /api/categorias/1/productos
+    public ResponseEntity<List<Producto>> productos(@PathVariable Long id) {
+        if (!repo.existsById(id)) {                                         // Si la categoria no existe -> 404
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productoRepo.findByCategoriaId(id));      // SELECT * FROM productos WHERE categoria_id = ?
     }
 }

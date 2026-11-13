@@ -167,3 +167,47 @@ Content-Type: application/json
 
 ### Eliminar cliente  (204)
 DELETE {{cliUrl}}/eliminar/2
+
+
+### =====================================================
+### RELACION Producto (muchos) -> Categoria (una)
+### @ManyToOne en Producto / @OneToMany en Categoria
+### Columna: productos.categoria_id (clave foranea)
+### =====================================================
+
+### Crear un producto YA enlazado a una categoria  (201)
+### Solo hace falta enviar el id de la categoria
+POST {{baseUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Mouse inalambrico",
+  "precio": 18.5,
+  "categoria": { "id": 1 }
+}
+
+### Crear un producto con una categoria que no existe  (400)
+POST {{baseUrl}}/crear
+Content-Type: application/json
+
+{
+  "nombre": "Producto X",
+  "precio": 5,
+  "categoria": { "id": 999 }
+}
+
+### Asignar (o cambiar) la categoria de un producto  (200)
+### PUT /api/productos/{id}/categoria/{categoriaId}
+PUT {{baseUrl}}/1/categoria/2
+
+### Quitar la categoria de un producto  (200) -> categoria_id = NULL
+DELETE {{baseUrl}}/1/categoria
+
+### Productos sin categoria  (200)
+GET {{baseUrl}}/sin-categoria
+
+### Productos de una categoria  (200 / 404)
+GET {{catUrl}}/1/productos
+
+### Eliminar una categoria que tiene productos  (409 Conflict)
+DELETE {{catUrl}}/eliminar/1

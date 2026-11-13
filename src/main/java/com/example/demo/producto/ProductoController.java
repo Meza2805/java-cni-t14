@@ -1,6 +1,8 @@
 // Paquete donde vive la clase
 package com.example.demo.producto;
 
+import com.example.demo.categoria.Categoria;           // Entidad relacionada
+import com.example.demo.categoria.CategoriaRepository; // Para buscar la categoria por id
 import jakarta.validation.Valid;                       // Activa las validaciones de la entidad (@NotBlank, etc.)
 import lombok.RequiredArgsConstructor;                 // Lombok: constructor para los campos "final"
 import org.springframework.http.ResponseEntity;        // Respuesta HTTP completa: codigo de estado + cuerpo
@@ -11,15 +13,16 @@ import java.util.List; // Lista de productos
 
 @RestController                    // Clase que atiende peticiones HTTP y responde JSON automaticamente
 @RequestMapping("/api/productos")  // Prefijo comun de TODAS las rutas de este controller
-@RequiredArgsConstructor           // Genera el constructor -> Spring inyecta el repositorio ahi
+@RequiredArgsConstructor           // Genera el constructor -> Spring inyecta los repositorios ahi
 public class ProductoController {
 
-    private final ProductoRepository repo; // Acceso a la BD. "final" = se asigna una vez (inyeccion por constructor)
+    private final ProductoRepository repo;               // Acceso a la tabla "productos"
+    private final CategoriaRepository categoriaRepo;     // Acceso a la tabla "categorias" (para la relacion)
 
     // ===================== READ: listar todos =====================
     @GetMapping("/listar")                 // GET /api/productos/listar
     public List<Producto> listar() {
-        return repo.findAll();             // SELECT * FROM productos -> Spring lo convierte en un arreglo JSON
+        return repo.findAll();             // SELECT * FROM productos (+ su categoria) -> arreglo JSON
     }
 
     // ===================== READ: obtener uno =====================
@@ -30,17 +33,30 @@ public class ProductoController {
                 .orElse(ResponseEntity.notFound().build());          // Si no existe -> 404 Not Found
     }
 
-    // ===================== CREATE: insertar =====================
-    @PostMapping("/crear")                                                       // POST /api/productos/crear
-    public ResponseEntity<Producto> crear(@Valid @RequestBody Producto producto) { // @RequestBody: JSON -> objeto Producto. @Valid: valida (si falla -> 400)
-        producto.setId(null);                                                    // Ignoramos cualquier id enviado: lo genera la BD
-        Producto guardado = repo.save(producto);                                 // INSERT INTO productos ... -> devuelve el producto con su id
+    // ===================== CREATE: insertar (con categoria opcional) =====================
+    // JSON de ejemplo:  { "nombre": "Mouse", "precio": 15, "categoria": { "id": 1 } }
+    // Si no se envia "categoria", el producto se crea sin categoria.
+    @PostMapping("/crear")                                                // POST /api/productos/crear
+    public ResponseEntity<?> crear(@Valid @RequestBody Producto producto) { // <?>: devuelve Producto o un mensaje de error
+        producto.setId(null);                                             // Ignoramos cualquier id enviado: lo genera la BD
+
+        if (producto.getCategoria() != null) {                            // Si el JSON trae una categoria...
+            Long categoriaId = producto.getCategoria().getId();           // ...tomamos solo su id
+            Categoria categoria = (categoriaId == null) ? null : categoriaRepo.findById(categoriaId).orElse(null);
+            if (categoria == null) {                                      // Si no existe esa categoria -> 400
+                return ResponseEntity.badRequest().body("No existe la categoria con id: " + categoriaId);
+            }
+            producto.setCategoria(categoria);                             // Enlazamos el producto con la categoria REAL de la BD
+        }
+
+        Producto guardado = repo.save(producto);                          // INSERT INTO productos (..., categoria_id) VALUES (..., ?)
         return ResponseEntity
-                .created(URI.create("/api/productos/obtener/" + guardado.getId())) // 201 Created + cabecera Location con la URL del nuevo recurso
+                .created(URI.create("/api/productos/obtener/" + guardado.getId())) // 201 Created + cabecera Location
                 .body(guardado);                                                    // Cuerpo: el producto guardado en JSON
     }
 
     // ===================== UPDATE: actualizar =====================
+    // Solo cambia nombre y precio. La categoria se cambia con los endpoints de RELACION (abajo).
     @PutMapping("/actualizar/{id}")                                     // PUT /api/productos/actualizar/1
     public ResponseEntity<Producto> actualizar(@PathVariable Long id,   // id que viene en la URL
                                                @Valid @RequestBody Producto datos) { // datos nuevos que vienen en el JSON
@@ -61,5 +77,42 @@ public class ProductoController {
         }
         repo.deleteById(id);                                 // DELETE FROM productos WHERE id = ?
         return ResponseEntity.noContent().build();           // 204 No Content: borrado OK, sin cuerpo
+    }
+
+    // =====================================================================
+    //                RELACION  Producto (muchos) -> Categoria (una)
+    // =====================================================================
+
+    // ===================== Asignar (o cambiar) la categoria de un producto =====================
+    @PutMapping("/{id}/categoria/{categoriaId}")               // PUT /api/productos/1/categoria/2
+    public ResponseEntity<?> asignarCategoria(@PathVariable Long id,
+                                              @PathVariable Long categoriaId) {
+        Producto producto = repo.findById(id).orElse(null);                  // Buscamos el producto
+        if (producto == null) {
+            return ResponseEntity.status(404).body("No existe el producto con id: " + id);
+        }
+        Categoria categoria = categoriaRepo.findById(categoriaId).orElse(null); // Buscamos la categoria
+        if (categoria == null) {
+            return ResponseEntity.status(404).body("No existe la categoria con id: " + categoriaId);
+        }
+        producto.setCategoria(categoria);              // Enlazamos los dos objetos en Java...
+        return ResponseEntity.ok(repo.save(producto)); // ...y JPA hace: UPDATE productos SET categoria_id = ? WHERE id = ?
+    }
+
+    // ===================== Quitar la categoria de un producto =====================
+    @DeleteMapping("/{id}/categoria")                          // DELETE /api/productos/1/categoria
+    public ResponseEntity<Producto> quitarCategoria(@PathVariable Long id) {
+        return repo.findById(id)
+                .map(p -> {
+                    p.setCategoria(null);                      // UPDATE productos SET categoria_id = NULL WHERE id = ?
+                    return ResponseEntity.ok(repo.save(p));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ===================== Productos sin categoria =====================
+    @GetMapping("/sin-categoria")                              // GET /api/productos/sin-categoria
+    public List<Producto> sinCategoria() {
+        return repo.findByCategoriaIsNull();                   // SELECT * FROM productos WHERE categoria_id IS NULL
     }
 }

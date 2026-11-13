@@ -1,7 +1,9 @@
 // Paquete donde vive la clase (debe coincidir con la carpeta)
 package com.example.demo.producto;
 
-// Anotaciones de JPA: @Entity, @Table, @Id, @Column, @GeneratedValue...
+// Entidad del otro lado de la relacion
+import com.example.demo.categoria.Categoria;
+// Anotaciones de JPA: @Entity, @Table, @Id, @Column, @GeneratedValue, @ManyToOne...
 import jakarta.persistence.*;
 // Validaciones: se revisan cuando el controller usa @Valid
 import jakarta.validation.constraints.NotBlank;
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "productos") // Nombre de la tabla. Sin esta anotacion la tabla se llamaria "producto"
 @Data                      // Lombok: genera getters, setters, toString, equals y hashCode
 @NoArgsConstructor         // Lombok: constructor vacio -> new Producto(). JPA lo necesita SI o SI
-@AllArgsConstructor        // Lombok: constructor con todos los campos -> new Producto(id, nombre, precio)
+@AllArgsConstructor        // Lombok: constructor con todos los campos -> new Producto(id, nombre, precio, categoria)
 public class Producto {
 
     @Id                                                 // Este campo es la CLAVE PRIMARIA (PRIMARY KEY)
@@ -28,4 +30,13 @@ public class Producto {
 
     @PositiveOrZero(message = "El precio no puede ser negativo") // Validacion: debe ser >= 0
     private Double precio;                                       // Columna "precio" -> FLOAT
+
+    // ===================== RELACION: muchos productos -> una categoria =====================
+    // @ManyToOne: MUCHOS productos pertenecen a UNA categoria.
+    // En la tabla "productos" se crea la columna "categoria_id" (CLAVE FORANEA / FOREIGN KEY)
+    // que apunta al "id" de la tabla "categorias".
+    // Este lado es el DUENO de la relacion: aqui vive la clave foranea.
+    @ManyToOne                              // Por defecto es EAGER: al leer un producto, trae su categoria con un JOIN
+    @JoinColumn(name = "categoria_id")      // Nombre de la columna FK. Admite NULL: un producto puede no tener categoria
+    private Categoria categoria;            // En Java guardamos el OBJETO completo, no solo el id
 }
