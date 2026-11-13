@@ -90,4 +90,14 @@ public class CategoriaController {
         }
         return ResponseEntity.ok(productoRepo.findByCategoriaId(id));      // SELECT * FROM productos WHERE categoria_id = ?
     }
+
+    // =====================================================================
+    //                    CONSULTAS CON JOIN (JPQL)
+    // =====================================================================
+
+    // ===================== Resumen: productos por categoria (LEFT JOIN + GROUP BY) =====================
+    @GetMapping("/resumen")                          // GET /api/categorias/resumen
+    public List<CategoriaResumen> resumen() {
+        return repo.resumen();                       // [{ "categoria": "...", "totalProductos": 2, "precioPromedio": 447.5 }, ...]
+    }
 }

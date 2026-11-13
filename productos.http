@@ -237,3 +237,27 @@ DELETE {{cliUrl}}/2/favoritos/3
 
 ### Lado contrario: que clientes tienen este producto como favorito  (200)
 GET {{baseUrl}}/1/clientes
+
+
+### =====================================================
+### CONSULTAS CON JOIN (JPQL)
+### Mira la consola: spring.jpa.show-sql=true imprime el SQL generado
+### =====================================================
+
+### INNER JOIN: productos por NOMBRE de categoria (no distingue mayusculas)
+GET {{baseUrl}}/buscar-por-categoria?nombre=Deportes
+
+### INNER JOIN + BETWEEN: productos de la categoria 1 con precio entre 10 y 100
+GET {{baseUrl}}/buscar-por-categoria-y-precio?categoriaId=1&min=10&max=100
+
+### LEFT JOIN + GROUP BY: total de productos y precio promedio por categoria
+### (las categorias sin productos aparecen con total 0)
+GET {{catUrl}}/resumen
+
+### Doble JOIN: clientes que tienen favoritos de la categoria 1
+### clientes -> cliente_favoritos -> productos -> categorias
+GET {{cliUrl}}/por-categoria-favorita/1
+
+### LEFT JOIN FETCH: clientes + favoritos + categorias en UNA sola consulta
+### Compara en la consola con /listar, que hace 1 + N consultas
+GET {{cliUrl}}/con-favoritos

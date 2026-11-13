@@ -134,4 +134,22 @@ public class ClienteController {
         repo.save(cliente);                                                // ...y JPA hace: DELETE FROM cliente_favoritos WHERE ...
         return ResponseEntity.noContent().build();                         // 204 No Content
     }
+
+    // =====================================================================
+    //                    CONSULTAS CON JOIN (JPQL)
+    // =====================================================================
+
+    // ===================== Clientes con favoritos de una categoria (doble JOIN) =====================
+    @GetMapping("/por-categoria-favorita/{categoriaId}")        // GET /api/clientes/por-categoria-favorita/1
+    public List<Cliente> porCategoriaFavorita(@PathVariable Long categoriaId) {
+        return repo.buscarPorCategoriaFavorita(categoriaId);    // clientes -> cliente_favoritos -> productos -> categorias
+    }
+
+    // ===================== Todos los clientes con sus favoritos en UNA consulta (JOIN FETCH) =====================
+    // Compara en la consola (spring.jpa.show-sql=true) cuantas consultas hace este endpoint
+    // contra /listar: /listar hace 1 + N, este hace solo 1.
+    @GetMapping("/con-favoritos")                               // GET /api/clientes/con-favoritos
+    public List<Cliente> conFavoritos() {
+        return repo.listarConFavoritos();
+    }
 }

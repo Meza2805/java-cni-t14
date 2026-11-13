@@ -139,4 +139,24 @@ public class ProductoController {
         }
         return ResponseEntity.ok(clienteRepo.findByFavoritosId(id));    // JOIN con la tabla cliente_favoritos
     }
+
+    // =====================================================================
+    //                    CONSULTAS CON JOIN (JPQL)
+    // =====================================================================
+
+    // ===================== Productos por NOMBRE de categoria (INNER JOIN) =====================
+    // @RequestParam toma el valor de la URL despues del "?": /buscar-por-categoria?nombre=Deportes
+    @GetMapping("/buscar-por-categoria")                                  // GET /api/productos/buscar-por-categoria?nombre=Deportes
+    public List<Producto> buscarPorCategoria(@RequestParam String nombre) {
+        return repo.buscarPorNombreDeCategoria(nombre);                   // JOIN productos + categorias
+    }
+
+    // ===================== Productos de una categoria en un rango de precio =====================
+    // min y max son opcionales: si no se envian se usan 0 y un numero muy grande
+    @GetMapping("/buscar-por-categoria-y-precio")   // GET /api/productos/buscar-por-categoria-y-precio?categoriaId=1&min=10&max=100
+    public List<Producto> buscarPorCategoriaYPrecio(@RequestParam Long categoriaId,
+                                                    @RequestParam(defaultValue = "0") Double min,
+                                                    @RequestParam(defaultValue = "1000000000") Double max) {
+        return repo.buscarPorCategoriaYPrecio(categoriaId, min, max);
+    }
 }

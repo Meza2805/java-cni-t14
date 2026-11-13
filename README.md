@@ -1,7 +1,8 @@
-# CRUD con Spring Boot + SQLite
+# Relaciones entre entidades con Spring Boot + JPA
 
-Proyecto de ejemplo de una API REST con **Spring Boot**, **Spring Data JPA** y una base de datos **SQLite**.
-Tiene tres entidades (Producto, Categoria y Cliente), cada una con su CRUD completo: crear, leer, actualizar y eliminar.
+Proyecto de ejemplo de una API REST con **Spring Boot**, **Spring Data JPA** y una base de datos **SQLite** (o MySQL / SQL Server).
+Tiene tres entidades (Producto, Categoria y Cliente), cada una con su CRUD completo, y **relaciones** entre ellas:
+`@ManyToOne` / `@OneToMany` (Producto - Categoria), `@ManyToMany` (Cliente - Producto) y consultas con **JOIN** en JPQL.
 Todo el código está comentado línea por línea.
 
 ## Requisitos
@@ -16,7 +17,7 @@ No hay que instalar SQLite: la base de datos es un archivo (`demo.db`) que se cr
 
 1. Descarga la rama:
    ```bash
-   git clone -b clase-springboot-crud-sqlite https://github.com/Meza2805/java-cni-t14.git
+   git clone -b clase-springboot-relaciones --single-branch https://github.com/Meza2805/java-cni-t14.git
    ```
 2. Abre la carpeta `java-cni-t14` (la raíz del repositorio) en VS Code.
 3. Ejecuta `DemoApplication.java` con el botón ▶ **Run**,
@@ -78,7 +79,7 @@ src/main/java/com/example/demo
 │   ├── Producto.java          Entidad  -> tabla "productos"
 │   ├── ProductoRepository.java  Acceso a la BD (Spring genera el SQL)
 │   └── ProductoController.java  Endpoints REST
-├── categoria/                 Mismo patrón: entidad, repositorio y controlador
+├── categoria/                 Mismo patrón (+ CategoriaResumen.java: DTO para el GROUP BY)
 ├── cliente/                   Mismo patrón: entidad, repositorio y controlador
 └── config/
     └── DatosIniciales.java    Inserta datos de ejemplo al arrancar
@@ -86,8 +87,9 @@ src/main/java/com/example/demo
 
 ### Datos de ejemplo
 
-Al arrancar la app, `DatosIniciales.java` inserta **5 categorías** y **5 clientes** de ejemplo
-(uno de ellos inactivo), pero **solo si la tabla está vacía**. Así se pueden probar los endpoints
+Al arrancar la app, `DatosIniciales.java` inserta **5 categorías**, **5 clientes** (uno inactivo),
+**7 productos** (enlazados a su categoría; uno queda sin categoría) y los **favoritos** de 4 clientes,
+pero **solo si la tabla está vacía**. Así se pueden probar los endpoints
 `GET` desde el primer momento sin duplicar datos en cada arranque.
 Para volver a empezar desde cero, detén la app y borra el archivo `demo.db`.
 
@@ -107,6 +109,58 @@ Cliente (Postman / REST Client)  →  Controller  →  Repository  →  SQLite (
 | Actualizar | PUT | `/api/productos/actualizar/{id}` | `/api/categorias/actualizar/{id}` | `/api/clientes/actualizar/{id}` |
 | Eliminar | DELETE | `/api/productos/eliminar/{id}` | `/api/categorias/eliminar/{id}` | `/api/clientes/eliminar/{id}` |
 | Solo activos | GET | — | — | `/api/clientes/activos` |
+
+## Relaciones entre entidades
+
+```
+ categorias                 productos                     cliente_favoritos            clientes
+┌──────────────┐ 1      N ┌───────────────────┐ 1      N ┌──────────────────┐ N      1 ┌──────────┐
+│ id (PK)      │◄─────────┤ categoria_id (FK) │◄─────────┤ producto_id (FK) │          │ id (PK)  │
+│ nombre       │          │ id (PK)           │          │ cliente_id  (FK) ├─────────►│ nombre   │
+│ descripcion  │          │ nombre, precio    │          └──────────────────┘          │ email ...│
+└──────────────┘          └───────────────────┘           tabla intermedia             └──────────┘
+```
+
+| Relación | Anotación (dueño) | Lado inverso | En la BD |
+|---|---|---|---|
+| Muchos productos → una categoría | `@ManyToOne` + `@JoinColumn` en `Producto` | `@OneToMany(mappedBy = "categoria")` en `Categoria` | Columna `productos.categoria_id` |
+| Muchos clientes ↔ muchos productos (favoritos) | `@ManyToMany` + `@JoinTable` en `Cliente` | — (unidireccional) | Tabla intermedia `cliente_favoritos` |
+
+Ideas clave:
+
+- El **dueño** de la relación es la entidad que tiene la clave foránea (o el `@JoinTable`). Solo los cambios en el dueño se guardan en la BD.
+- `@JsonIgnore` en `Categoria.productos` evita un JSON infinito (categoría → productos → categoría → ...).
+- `@ManyToOne` es **EAGER** por defecto (trae la categoría junto al producto). `@OneToMany` y `@ManyToMany` son **LAZY** (se cargan solo al usarlas).
+- **Integridad referencial**: no se puede borrar una categoría con productos (409), y al borrar un producto primero se quita de los favoritos.
+  MySQL y SQL Server crean las claves foráneas y las hacen cumplir; SQLite, por defecto, no las revisa.
+
+### Endpoints de relaciones
+
+| Operación | Método | Ruta |
+|---|---|---|
+| Crear producto con categoría | POST | `/api/productos/crear` con `"categoria": { "id": 1 }` |
+| Asignar / cambiar categoría | PUT | `/api/productos/{id}/categoria/{categoriaId}` |
+| Quitar categoría | DELETE | `/api/productos/{id}/categoria` |
+| Productos sin categoría | GET | `/api/productos/sin-categoria` |
+| Productos de una categoría | GET | `/api/categorias/{id}/productos` |
+| Favoritos de un cliente | GET | `/api/clientes/{id}/favoritos` |
+| Agregar favorito | POST | `/api/clientes/{id}/favoritos/{productoId}` |
+| Quitar favorito | DELETE | `/api/clientes/{id}/favoritos/{productoId}` |
+| Clientes que tienen un producto como favorito | GET | `/api/productos/{id}/clientes` |
+
+### Consultas con JOIN (JPQL)
+
+JPQL se escribe con **clases y atributos** (`JOIN p.categoria c`), no con tablas: JPA ya sabe por qué columnas unir.
+
+| Consulta | Ruta | JOIN |
+|---|---|---|
+| Productos por nombre de categoría | `GET /api/productos/buscar-por-categoria?nombre=Deportes` | `INNER JOIN` |
+| Productos de una categoría en un rango de precio | `GET /api/productos/buscar-por-categoria-y-precio?categoriaId=1&min=10&max=100` | `INNER JOIN` + `BETWEEN` |
+| Resumen: total y precio promedio por categoría | `GET /api/categorias/resumen` | `LEFT JOIN` + `GROUP BY` + DTO |
+| Clientes con favoritos de una categoría | `GET /api/clientes/por-categoria-favorita/{categoriaId}` | Doble `JOIN` (3 entidades) |
+| Clientes con sus favoritos en 1 consulta | `GET /api/clientes/con-favoritos` | `LEFT JOIN FETCH` (evita N+1) |
+
+Para ver el SQL que genera cada consulta, mira la consola: `spring.jpa.show-sql=true` lo imprime.
 
 ### Códigos de respuesta
 
