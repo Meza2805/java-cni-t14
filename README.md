@@ -1,9 +1,47 @@
-# Relaciones entre entidades con Spring Boot + JPA
+# Spring Boot + Thymeleaf: páginas HTML sobre la API REST
 
-Proyecto de ejemplo de una API REST con **Spring Boot**, **Spring Data JPA** y una base de datos **SQLite** (o MySQL / SQL Server).
-Tiene tres entidades (Producto, Categoria y Cliente), cada una con su CRUD completo, y **relaciones** entre ellas:
-`@ManyToOne` / `@OneToMany` (Producto - Categoria), `@ManyToMany` (Cliente - Producto) y consultas con **JOIN** en JPQL.
+Proyecto de ejemplo con **Spring Boot**, **Spring Data JPA** y una base de datos **SQLite** (o MySQL / SQL Server).
+Tiene tres entidades (Producto, Categoria y Cliente), cada una con su CRUD completo, **relaciones** entre ellas
+(`@ManyToOne` / `@OneToMany`, `@ManyToMany`), consultas con **JOIN** en JPQL y, en esta rama,
+**páginas HTML con Thymeleaf** que usan esos datos y endpoints, con reportes en **Excel** y **PDF**.
 Todo el código está comentado línea por línea.
+
+## Páginas con Thymeleaf (rama `clase-springboot-thymeleaf`)
+
+Arranca la app y abre `http://localhost:8080` en el navegador.
+
+| Página | Controller | Qué muestra | Cómo obtiene los datos |
+|---|---|---|---|
+| `/` | `InicioController` | Totales y mapa de la aplicación | `Model` + `${...}` |
+| `/categorias` | `CategoriaVistaController` | CRUD de categorías | **Thymeleaf clásico**: `Model`, `th:each`, formulario `th:object` con `POST /categorias/guardar` y validaciones `th:errors` |
+| `/productos` | `ProductoVistaController` | CRUD de productos | **La página consume la API REST** con `fetch()`: `GET/POST/PUT/DELETE /api/productos/...` |
+| `/relaciones` | `RelacionVistaController` | Categorías con productos, clientes con favoritos y resumen | Consultas `LEFT JOIN FETCH` + `POST/DELETE /api/clientes/{id}/favoritos/{productoId}` |
+| `/reportes` | `ReporteController` | Descarga de reportes | `GET /reportes/productos.xlsx` (Apache POI) y `GET /reportes/productos.pdf` (OpenPDF) |
+
+Archivos nuevos:
+
+```
+src/main/java/com/example/demo/
+├── web/                      ← controllers de VISTAS (@Controller, devuelven el nombre de una plantilla)
+├── reporte/                  ← ReporteService (arma Excel y PDF) + ReporteController (los entrega)
+└── config/ErroresApi.java    ← respuestas 400 con { campo: mensaje } para la API
+src/main/resources/
+├── templates/                ← plantillas Thymeleaf (.html)
+│   └── fragments/layout.html ← <head>, menú, pie y <script> compartidos (th:fragment / th:replace)
+└── static/                   ← archivos que se sirven tal cual
+    ├── css/app.css
+    └── js/app.js, productos.js, relaciones.js
+```
+
+Librerías de JavaScript (se cargan desde CDN en `fragments/layout.html`, así que la página necesita internet):
+
+| Librería | Para qué |
+|---|---|
+| Bootstrap 5 + Bootstrap Icons | Diseño, botones, ventanas modales, iconos |
+| jQuery | Lo necesitan Notify.js y DataTables |
+| DataTables | Tablas con buscador, orden y paginación (en `/productos` se llena con el JSON de la API) |
+| SweetAlert2 | Ventanas de confirmación ("¿Eliminar?") y de error |
+| Notify.js | Notificaciones pequeñas ("Producto creado") |
 
 ## Requisitos
 
@@ -17,7 +55,7 @@ No hay que instalar SQLite: la base de datos es un archivo (`demo.db`) que se cr
 
 1. Descarga la rama:
    ```bash
-   git clone -b clase-springboot-relaciones --single-branch https://github.com/Meza2805/java-cni-t14.git
+   git clone -b clase-springboot-thymeleaf --single-branch https://github.com/Meza2805/java-cni-t14.git
    ```
 2. Abre la carpeta `java-cni-t14` (la raíz del repositorio) en VS Code.
 3. Ejecuta `DemoApplication.java` con el botón ▶ **Run**,
@@ -183,6 +221,9 @@ Para ver el SQL que genera cada consulta, mira la consola: `spring.jpa.show-sql=
 | `hibernate-community-dialects` | Le enseña a Hibernate a generar SQL para SQLite |
 | `spring-boot-starter-validation` | Validaciones: `@NotBlank`, `@Email`, `@Min`... |
 | `lombok` | Genera getters, setters y constructores |
+| `spring-boot-starter-thymeleaf` | Plantillas HTML con datos (`th:text`, `th:each`, `th:object`...) |
+| `poi-ooxml` (Apache POI) | Crear archivos de Excel `.xlsx` |
+| `openpdf` | Crear documentos PDF |
 
 ## Ejercicio propuesto
 

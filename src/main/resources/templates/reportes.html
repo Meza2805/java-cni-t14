@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Reportes')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('reportes')}"></nav>
+
+<main class="container py-4">
+    <p class="eyebrow mb-1">// Endpoints que devuelven archivos</p>
+    <h1 class="titulo mb-4">Reportes</h1>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h4"><i class="bi bi-file-earmark-excel text-success"></i> Excel de productos</h2>
+                    <p>Dos hojas: la lista de productos con su categoría y el resumen por categoría. Se genera con <strong>Apache POI</strong>.</p>
+                    <p><span class="endpoint">GET /reportes/productos.xlsx</span></p>
+                    <a class="btn btn-success" th:href="@{/reportes/productos.xlsx}"><i class="bi bi-download"></i> Descargar Excel</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h4"><i class="bi bi-file-earmark-pdf text-danger"></i> PDF de productos</h2>
+                    <p>Tabla de productos y resumen por categoría con la fecha de generación. Se genera con <strong>OpenPDF</strong>.</p>
+                    <p><span class="endpoint">GET /reportes/productos.pdf</span></p>
+                    <a class="btn btn-danger" th:href="@{/reportes/productos.pdf}"><i class="bi bi-download"></i> Descargar PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header fw-bold"><i class="bi bi-info-circle"></i> ¿Cómo sabe el navegador que debe descargar?</div>
+        <div class="card-body">
+            <p class="mb-2">Por las cabeceras de la respuesta que arma <code>ReporteController</code>:</p>
+            <pre class="codigo mb-0">HTTP/1.1 200 OK
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+Content-Disposition: attachment; filename="productos.xlsx"</pre>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -35,4 +35,15 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
             ORDER BY COUNT(p) DESC
             """)
     List<CategoriaResumen> resumen();
+
+    // ===================== JPQL: LEFT JOIN FETCH (para las vistas Thymeleaf) =====================
+    // Trae cada categoria CON su lista de productos en UNA sola consulta.
+    // Sin FETCH, al mostrar c.productos en la pagina, Hibernate haria 1 consulta extra
+    // por cada categoria (el problema N+1).
+    @Query("""
+            SELECT DISTINCT c FROM Categoria c
+            LEFT JOIN FETCH c.productos
+            ORDER BY c.id
+            """)
+    List<Categoria> listarConProductos();
 }

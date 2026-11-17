@@ -42,6 +42,24 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
+		<!-- Thymeleaf: motor de plantillas. Convierte archivos HTML de src/main/resources/templates
+		     en paginas con datos (th:text, th:each, th:object...). La version la gestiona Spring Boot -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<!-- Apache POI: crea archivos de Excel (.xlsx) desde Java. Spring Boot NO gestiona su version -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.4.1</version>
+		</dependency>
+		<!-- OpenPDF: crea documentos PDF desde Java (paquete com.lowagie.text) -->
+		<dependency>
+			<groupId>com.github.librepdf</groupId>
+			<artifactId>openpdf</artifactId>
+			<version>2.0.3</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

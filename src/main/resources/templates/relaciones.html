@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Relaciones')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('relaciones')}"></nav>
+
+<main class="container py-4">
+    <p class="eyebrow mb-1">// JPA en pantalla · @OneToMany · @ManyToMany · GROUP BY</p>
+    <h1 class="titulo mb-4">Relaciones</h1>
+
+    <!-- ===================== 1) @OneToMany: categorias con sus productos ===================== -->
+    <h2 class="subtitulo">Categorías y sus productos <span class="endpoint">listarConProductos() · LEFT JOIN FETCH</span></h2>
+    <div class="row g-3 mb-5">
+        <div class="col-sm-6 col-lg-4" th:each="c : ${categorias}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold" th:text="${c.nombre}">Categoria</span>
+                    <span class="badge text-bg-primary" th:text="${c.productos.size()} + ' productos'">0</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <!-- th:each anidado: los productos de ESTA categoria -->
+                    <li class="list-group-item d-flex justify-content-between" th:each="p : ${c.productos}">
+                        <span th:text="${p.nombre}">Producto</span>
+                        <!-- #numbers.formatDecimal: 2 decimales con separador de miles -->
+                        <span class="text-secondary"
+                              th:text="${p.precio != null} ? ${#numbers.formatDecimal(p.precio, 1, 'COMMA', 2, 'POINT')} : '-'">0.00</span>
+                    </li>
+                    <!-- th:if + isEmpty(): mensaje cuando la lista viene vacia (Ropa) -->
+                    <li class="list-group-item text-secondary fst-italic" th:if="${c.productos.isEmpty()}">Sin productos</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== 2) @ManyToMany: clientes y favoritos ===================== -->
+    <h2 class="subtitulo">Clientes y sus favoritos <span class="endpoint">listarConFavoritos() · tabla cliente_favoritos</span></h2>
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <!-- Agregar un favorito llama al endpoint REST: POST /api/clientes/{id}/favoritos/{productoId} -->
+            <form id="formFavorito" class="row g-2 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label" for="favCliente">Cliente</label>
+                    <select class="form-select" id="favCliente">
+                        <option th:each="cl : ${clientes}" th:value="${cl.id}" th:text="${cl.nombre}">Cliente</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="favProducto">Producto</label>
+                    <select class="form-select" id="favProducto">
+                        <option th:each="p : ${productos}" th:value="${p.id}" th:text="${p.nombre}">Producto</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-heart"></i> Agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card shadow-sm mb-5">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Cliente</th><th>Email</th><th>Estado</th><th>Favoritos</th></tr></thead>
+                <tbody>
+                <tr th:each="cl : ${clientes}">
+                    <td class="fw-semibold" th:text="${cl.nombre}">Cliente</td>
+                    <td th:text="${cl.email}">correo</td>
+                    <!-- th:classappend + ternario: verde si esta activo, gris si no -->
+                    <td><span class="badge" th:classappend="${cl.activo} ? 'text-bg-success' : 'text-bg-secondary'"
+                              th:text="${cl.activo} ? 'Activo' : 'Inactivo'">Activo</span></td>
+                    <td>
+                        <span class="badge rounded-pill text-bg-warning me-1 favorito" th:each="p : ${cl.favoritos}">
+                            <span th:text="${p.nombre}">Producto</span>
+                            <!-- data-* guardan los ids que necesita el endpoint DELETE -->
+                            <button type="button" class="btn-quitar" title="Quitar"
+                                    th:attr="data-cliente=${cl.id},data-producto=${p.id},data-nombre=${p.nombre}">&times;</button>
+                        </span>
+                        <span class="text-secondary fst-italic" th:if="${cl.favoritos.isEmpty()}">Sin favoritos</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== 3) Resumen: LEFT JOIN + GROUP BY ===================== -->
+    <h2 class="subtitulo">Resumen por categoría <span class="endpoint">resumen() · LEFT JOIN + GROUP BY + DTO</span></h2>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead><tr><th>Categoría</th><th class="text-end">Total productos</th><th class="text-end">Precio promedio</th></tr></thead>
+                <tbody>
+                <!-- CategoriaResumen es un record: se leen sus datos llamando a sus metodos r.categoria() -->
+                <tr th:each="r : ${resumen}">
+                    <td th:text="${r.categoria()}">Categoria</td>
+                    <td class="text-end" th:text="${r.totalProductos()}">0</td>
+                    <td class="text-end"
+                        th:text="${r.precioPromedio() != null} ? ${#numbers.formatDecimal(r.precioPromedio(), 1, 'COMMA', 2, 'POINT')} : '-'">0.00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/relaciones.js}"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+/* =====================================================================
+   Estilos propios (los colores del curso). Bootstrap hace casi todo.
+   Archivos en src/main/resources/static se sirven tal cual: /css/app.css
+   ===================================================================== */
+:root {
+  --navy: #13254A;
+  --azul: #2E6AAE;
+  --amarillo: #F6C343;
+  --naranja: #F08A24;
+  --crema: #FBF3E0;
+  --bs-primary: #2E6AAE;
+  --bs-primary-rgb: 46, 106, 174;
+}
+body { background: var(--crema); color: var(--navy); min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+
+/* Menu */
+.barra { background: var(--navy); border-bottom: 4px solid var(--amarillo); }
+.barra .nav-link.active { color: var(--amarillo) !important; font-weight: 700; }
+
+/* Titulos */
+.eyebrow { font-family: Consolas, "Courier New", monospace; font-size: .9rem; font-weight: 700; color: #B04E0B; letter-spacing: .5px; }
+.titulo { font-weight: 800; color: var(--navy); }
+.subtitulo { font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+
+/* Portada del inicio */
+.portada { background: var(--azul); color: var(--crema); border-radius: 1rem; padding: 2rem; border: 3px solid var(--navy); box-shadow: 8px 8px 0 var(--navy); }
+.portada .eyebrow { color: var(--amarillo); }
+.portada .titulo { color: var(--crema); }
+
+/* Tarjetas del inicio */
+.tarjeta { display: flex; flex-direction: column; gap: .2rem; background: #fff; border: 3px solid var(--navy); border-radius: 1rem; padding: 1.5rem; text-decoration: none; color: var(--navy); box-shadow: 6px 6px 0 var(--naranja); transition: transform .15s; height: 100%; }
+.tarjeta:hover { transform: translateY(-3px); color: var(--navy); }
+.tarjeta i { font-size: 2rem; color: var(--azul); }
+.tarjeta .numero { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+.tarjeta .etiqueta { font-weight: 700; font-size: 1.1rem; }
+.tarjeta .detalle { font-size: .9rem; color: #4A5875; }
+
+/* Etiqueta que muestra el endpoint que usa cada parte de la pagina */
+.endpoint { font-family: Consolas, "Courier New", monospace; font-size: .8rem; font-weight: 700; background: var(--amarillo); color: var(--navy); border: 2px solid var(--navy); border-radius: .4rem; padding: .15rem .5rem; white-space: nowrap; }
+
+/* Tarjetas de Bootstrap con el borde del curso */
+.card { border: 2px solid var(--navy); border-radius: .8rem; }
+.card-header { background: var(--navy); color: var(--crema); }
+
+/* Favoritos: pildora con boton para quitar */
+.favorito { font-size: .85rem; }
+.btn-quitar { border: 0; background: transparent; font-weight: 700; line-height: 1; padding: 0 0 0 .3rem; color: var(--navy); }
+.btn-quitar:hover { color: #B02A37; }
+
+/* Bloque de codigo */
+.codigo { background: #0F1E3D; color: #E8EEF9; padding: 1rem; border-radius: .6rem; font-size: .85rem; white-space: pre-wrap; }
+
+.pie { background: var(--navy); color: #BCCBE6; padding: 1rem; font-size: .85rem; margin-top: 2rem; }

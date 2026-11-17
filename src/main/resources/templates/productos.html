@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Productos')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('productos')}"></nav>
+
+<main class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-end mb-3 gap-2">
+        <div>
+            <p class="eyebrow mb-1">// Thymeleaf + endpoints REST · fetch() y JSON</p>
+            <h1 class="titulo mb-0">Productos</h1>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <!-- Los reportes son endpoints que devuelven archivos -->
+            <a class="btn btn-success" th:href="@{/reportes/productos.xlsx}"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+            <a class="btn btn-danger" th:href="@{/reportes/productos.pdf}"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+            <button id="btnNuevo" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo producto</button>
+        </div>
+    </div>
+
+    <!-- Que endpoint alimenta la tabla: se puede abrir para ver el JSON "crudo" -->
+    <p class="mb-3">
+        <span class="endpoint">GET /api/productos/listar</span>
+        <a class="small ms-2" th:href="@{/api/productos/listar}" target="_blank">ver el JSON <i class="bi bi-box-arrow-up-right"></i></a>
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <!-- La tabla empieza VACIA: DataTables la llena con el JSON del endpoint (productos.js) -->
+            <table id="tablaProductos" class="table table-striped align-middle w-100">
+                <thead>
+                <tr><th>ID</th><th>Nombre</th><th class="text-end">Precio</th><th>Categoría</th><th class="text-end">Acciones</th></tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- ===================== VENTANA MODAL: crear / editar ===================== -->
+<div class="modal fade" id="modalProducto" tabindex="-1">
+    <div class="modal-dialog">
+        <form id="formProducto" class="modal-content" novalidate>
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloModal">Nuevo producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="productoId">
+                <div class="mb-3">
+                    <label class="form-label" for="nombre">Nombre</label>
+                    <input class="form-control" id="nombre" required>
+                    <div class="invalid-feedback">El nombre es obligatorio</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="precio">Precio</label>
+                    <input class="form-control" id="precio" type="number" min="0" step="0.01" required>
+                    <div class="invalid-feedback">Escribe un precio mayor o igual a 0</div>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label" for="categoriaId">Categoría</label>
+                    <select class="form-select" id="categoriaId">
+                        <option value="">Sin categoría</option>
+                        <!-- Thymeleaf llena las opciones con las categorias del Model -->
+                        <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}">Categoria</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:src="@{/js/productos.js}"></script>
+</body>
+</html>

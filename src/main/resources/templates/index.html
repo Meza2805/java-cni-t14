@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!-- Inserta el <head> comun y le pasa el titulo de esta pagina -->
+<head th:replace="~{fragments/layout :: head('Inicio')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('inicio')}"></nav>
+
+<main class="container py-4">
+    <div class="portada mb-4">
+        <p class="eyebrow">// Unidad II · Desarrollo Backend con Java</p>
+        <h1 class="titulo">Spring Boot + Thymeleaf</h1>
+        <p class="lead mb-0">Las mismas entidades y endpoints del curso, ahora en páginas HTML.</p>
+    </div>
+
+    <!-- Tarjetas con los totales: ${...} lee los datos que el controller puso en el Model -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <a class="tarjeta" th:href="@{/categorias}">
+                <i class="bi bi-tags"></i>
+                <span class="numero" th:text="${totalCategorias}">0</span>
+                <span class="etiqueta">Categorías</span>
+                <span class="detalle">Thymeleaf clásico: formulario con th:object</span>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="tarjeta" th:href="@{/productos}">
+                <i class="bi bi-box-seam"></i>
+                <span class="numero" th:text="${totalProductos}">0</span>
+                <span class="etiqueta">Productos</span>
+                <span class="detalle">La página consume la API REST con fetch()</span>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="tarjeta" th:href="@{/relaciones}">
+                <i class="bi bi-people"></i>
+                <span class="numero" th:text="${totalClientes}">0</span>
+                <span class="etiqueta">Clientes</span>
+                <span class="detalle">Relaciones y favoritos</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Mapa: que pagina usa que endpoint -->
+    <div class="card shadow-sm">
+        <div class="card-header fw-bold"><i class="bi bi-signpost-split"></i> Mapa de la aplicación</div>
+        <div class="table-responsive">
+            <table class="table table-striped mb-0 align-middle">
+                <thead><tr><th>Página</th><th>Controller</th><th>Cómo obtiene los datos</th></tr></thead>
+                <tbody>
+                <tr><td><a th:href="@{/categorias}">/categorias</a></td><td>CategoriaVistaController</td><td>Model + th:each, formulario POST /categorias/guardar</td></tr>
+                <tr><td><a th:href="@{/productos}">/productos</a></td><td>ProductoVistaController</td><td>fetch() a <code>/api/productos/...</code> (GET, POST, PUT, DELETE)</td></tr>
+                <tr><td><a th:href="@{/relaciones}">/relaciones</a></td><td>RelacionVistaController</td><td>Consultas con JOIN FETCH + <code>/api/clientes/{id}/favoritos</code></td></tr>
+                <tr><td><a th:href="@{/reportes}">/reportes</a></td><td>ReporteController</td><td>Archivos: <code>/reportes/productos.xlsx</code> y <code>.pdf</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
