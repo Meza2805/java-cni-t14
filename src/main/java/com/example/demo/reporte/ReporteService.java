@@ -5,6 +5,8 @@ import com.example.demo.categoria.CategoriaRepository;
 import com.example.demo.categoria.CategoriaResumen;
 import com.example.demo.producto.Producto;
 import com.example.demo.producto.ProductoRepository;
+import com.example.demo.proveedor.ProveedorRepository;   // PRACTICA
+import com.example.demo.proveedor.ProveedorResumen;      // PRACTICA
 import com.lowagie.text.Document;            // OpenPDF: el documento PDF
 import com.lowagie.text.Element;             // Alineaciones (CENTER, RIGHT...)
 import com.lowagie.text.Font;                // Tipo, tamano y color de letra
@@ -37,6 +39,7 @@ public class ReporteService {
 
     private final ProductoRepository productoRepo;
     private final CategoriaRepository categoriaRepo;
+    private final ProveedorRepository proveedorRepo;   // PRACTICA
 
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -169,6 +172,42 @@ public class ReporteService {
         doc.add(resumen);
 
         doc.close();                                          // Cierra el documento: ya esta completo
+        return salida.toByteArray();
+    }
+
+    // =====================================================================
+    //   PRACTICA: PDF de proveedores (copia de productosPdf, mas corto)
+    // =====================================================================
+    public byte[] proveedoresPdf() {
+        Color azul = new Color(19, 37, 74);
+        Font titulo = new Font(Font.HELVETICA, 18, Font.BOLD, azul);
+        Font subtitulo = new Font(Font.HELVETICA, 10, Font.NORMAL, Color.DARK_GRAY);
+        Font cabecera = new Font(Font.HELVETICA, 10, Font.BOLD, Color.WHITE);
+        Font normal = new Font(Font.HELVETICA, 10, Font.NORMAL, Color.BLACK);
+
+        ByteArrayOutputStream salida = new ByteArrayOutputStream();
+        Document doc = new Document(PageSize.A4, 40, 40, 50, 40);
+        PdfWriter.getInstance(doc, salida);
+        doc.open();
+
+        doc.add(new Paragraph("Reporte de proveedores", titulo));
+        doc.add(new Paragraph("Generado el " + LocalDateTime.now().format(FECHA) + " · CRUD Spring Boot", subtitulo));
+        doc.add(new Paragraph(" "));
+
+        // LEFT JOIN + GROUP BY: cada proveedor con la cantidad de productos que surte (0 si ninguno)
+        PdfPTable tabla = new PdfPTable(new float[]{5, 2});
+        tabla.setWidthPercentage(100);
+        tabla.getDefaultCell().setPadding(5);
+        celdasCabecera(tabla, cabecera, azul, "Proveedor", "Productos que surte");
+        List<ProveedorResumen> filas = proveedorRepo.resumen();
+        for (ProveedorResumen r : filas) {
+            tabla.addCell(new Phrase(r.proveedor(), normal));
+            tabla.addCell(new Phrase(String.valueOf(r.totalProductos()), normal));
+        }
+        doc.add(tabla);
+        doc.add(new Paragraph("Total de proveedores: " + filas.size(), subtitulo));
+
+        doc.close();
         return salida.toByteArray();
     }
 

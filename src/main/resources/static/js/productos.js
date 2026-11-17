@@ -18,6 +18,13 @@ const tabla = new DataTable('#tablaProductos', {
                 : '<span class="badge text-bg-secondary">Sin categoría</span>'
         },
         {
+            // PRACTICA: el JSON ahora trae "proveedor": { id, nombre, email, telefono } o null
+            data: 'proveedor',
+            render: (prov) => prov
+                ? `<span class="badge text-bg-warning">${escapar(prov.nombre)}</span>`
+                : '<span class="badge text-bg-light border">Sin proveedor</span>'
+        },
+        {
             data: null, orderable: false, className: 'text-end text-nowrap',
             render: () => `
                 <button class="btn btn-sm btn-outline-primary btn-editar" title="Editar"><i class="bi bi-pencil"></i></button>
@@ -33,7 +40,8 @@ const campo = {
     id: document.getElementById('productoId'),
     nombre: document.getElementById('nombre'),
     precio: document.getElementById('precio'),
-    categoria: document.getElementById('categoriaId')
+    categoria: document.getElementById('categoriaId'),
+    proveedor: document.getElementById('proveedorId')      // PRACTICA
 };
 
 function abrirModal(producto) {
@@ -43,6 +51,7 @@ function abrirModal(producto) {
     campo.nombre.value = producto?.nombre ?? '';
     campo.precio.value = producto?.precio ?? '';
     campo.categoria.value = producto?.categoria?.id ?? '';
+    campo.proveedor.value = producto?.proveedor?.id ?? '';  // PRACTICA
     modal.show();
 }
 
@@ -63,12 +72,14 @@ form.addEventListener('submit', async (evento) => {
 
     const id = campo.id.value;
     const categoriaId = campo.categoria.value;
+    const proveedorId = campo.proveedor.value;          // PRACTICA
     const datos = { nombre: campo.nombre.value.trim(), precio: Number(campo.precio.value) };
 
     try {
         if (!id) {
             // POST /api/productos/crear  ->  { "nombre": "...", "precio": 10, "categoria": { "id": 1 } }
             if (categoriaId) datos.categoria = { id: Number(categoriaId) };
+            if (proveedorId) datos.proveedor = { id: Number(proveedorId) };   // PRACTICA
             const creado = await api('/api/productos/crear', 'POST', datos);
             notificar(`Producto "${creado.nombre}" creado`);
         } else {
@@ -79,6 +90,12 @@ form.addEventListener('submit', async (evento) => {
                 await api(`/api/productos/${id}/categoria/${categoriaId}`, 'PUT');
             } else {
                 await api(`/api/productos/${id}/categoria`, 'DELETE');
+            }
+            // PRACTICA: el proveedor tambien se cambia con los endpoints de su relacion
+            if (proveedorId) {
+                await api(`/api/productos/${id}/proveedor/${proveedorId}`, 'PUT');
+            } else {
+                await api(`/api/productos/${id}/proveedor`, 'DELETE');
             }
             notificar('Producto actualizado');
         }

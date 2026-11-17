@@ -47,6 +47,12 @@ public class ReporteController {
         return archivo(reporteService.productosPdf(), "productos.pdf", MediaType.APPLICATION_PDF);
     }
 
+    // ===================== PRACTICA: PDF de proveedores =====================
+    @GetMapping("/proveedores.pdf")                 // GET /reportes/proveedores.pdf
+    public ResponseEntity<byte[]> proveedoresPdf() {
+        return archivo(reporteService.proveedoresPdf(), "proveedores.pdf", MediaType.APPLICATION_PDF);
+    }
+
     // Arma la respuesta: 200 OK + cabeceras + los bytes del archivo
     private ResponseEntity<byte[]> archivo(byte[] bytes, String nombre, MediaType tipo) {
         return ResponseEntity.ok()

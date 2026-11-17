@@ -2,6 +2,7 @@
 package com.example.demo.web;
 
 import com.example.demo.categoria.CategoriaRepository;
+import com.example.demo.proveedor.ProveedorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,10 +28,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ProductoVistaController {
 
     private final CategoriaRepository categoriaRepo;
+    private final ProveedorRepository proveedorRepo;   // PRACTICA
 
     @GetMapping("/productos")                                   // GET /productos  (la API es /api/productos)
     public String productos(Model model) {
         model.addAttribute("categorias", categoriaRepo.findAll()); // Para las <option> del <select> (th:each)
+        model.addAttribute("proveedores", proveedorRepo.findAll()); // PRACTICA: <select> de proveedores
         return "productos";                                     // templates/productos.html
     }
 }

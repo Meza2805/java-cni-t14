@@ -3,6 +3,7 @@ package com.example.demo.producto;
 
 // Entidad del otro lado de la relacion
 import com.example.demo.categoria.Categoria;
+import com.example.demo.proveedor.Proveedor;   // PRACTICA: entidad del proveedor
 // Anotaciones de JPA: @Entity, @Table, @Id, @Column, @GeneratedValue, @ManyToOne...
 import jakarta.persistence.*;
 // Validaciones: se revisan cuando el controller usa @Valid
@@ -39,4 +40,18 @@ public class Producto {
     @ManyToOne                              // Por defecto es EAGER: al leer un producto, trae su categoria con un JOIN
     @JoinColumn(name = "categoria_id")      // Nombre de la columna FK. Admite NULL: un producto puede no tener categoria
     private Categoria categoria;            // En Java guardamos el OBJETO completo, no solo el id
+
+    // ===================== PRACTICA: muchos productos -> un proveedor =====================
+    // Igual que la categoria: en la tabla "productos" se agrega la columna "proveedor_id" (FK).
+    // Con ddl-auto=update, Hibernate hace solo: ALTER TABLE productos ADD COLUMN proveedor_id ...
+    @ManyToOne                              // EAGER: al leer un producto trae su proveedor
+    @JoinColumn(name = "proveedor_id")      // Admite NULL: los productos que ya existian quedan sin proveedor
+    private Proveedor proveedor;
+
+    // Constructor de 4 datos que usa DatosIniciales: new Producto(null, "Laptop", 850.0, electronica)
+    // (Al agregar "proveedor", @AllArgsConstructor ahora pide 5 datos; este constructor evita
+    //  tener que cambiar todos los "new Producto(...)" que ya existian)
+    public Producto(Long id, String nombre, Double precio, Categoria categoria) {
+        this(id, nombre, precio, categoria, null);
+    }
 }

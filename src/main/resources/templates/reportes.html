@@ -29,6 +29,17 @@
                 </div>
             </div>
         </div>
+        <!-- PRACTICA: reporte de proveedores -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h4"><i class="bi bi-truck text-danger"></i> PDF de proveedores</h2>
+                    <p>Cada proveedor con la cantidad de productos que surte (LEFT JOIN + GROUP BY).</p>
+                    <p><span class="endpoint">GET /reportes/proveedores.pdf</span></p>
+                    <a class="btn btn-danger" th:href="@{/reportes/proveedores.pdf}"><i class="bi bi-download"></i> Descargar PDF</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="card shadow-sm mt-4">

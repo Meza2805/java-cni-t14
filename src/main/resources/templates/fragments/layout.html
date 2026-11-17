@@ -43,6 +43,8 @@
                 <li class="nav-item"><a class="nav-link" th:classappend="${activo == 'inicio'} ? 'active'" th:href="@{/}"><i class="bi bi-house"></i> Inicio</a></li>
                 <li class="nav-item"><a class="nav-link" th:classappend="${activo == 'categorias'} ? 'active'" th:href="@{/categorias}"><i class="bi bi-tags"></i> Categorías</a></li>
                 <li class="nav-item"><a class="nav-link" th:classappend="${activo == 'productos'} ? 'active'" th:href="@{/productos}"><i class="bi bi-box-seam"></i> Productos</a></li>
+                <!-- PRACTICA: nueva opcion del menu -->
+                <li class="nav-item"><a class="nav-link" th:classappend="${activo == 'proveedores'} ? 'active'" th:href="@{/proveedores}"><i class="bi bi-truck"></i> Proveedores</a></li>
                 <li class="nav-item"><a class="nav-link" th:classappend="${activo == 'relaciones'} ? 'active'" th:href="@{/relaciones}"><i class="bi bi-diagram-3"></i> Relaciones</a></li>
                 <li class="nav-item"><a class="nav-link" th:classappend="${activo == 'reportes'} ? 'active'" th:href="@{/reportes}"><i class="bi bi-file-earmark-arrow-down"></i> Reportes</a></li>
             </ul>

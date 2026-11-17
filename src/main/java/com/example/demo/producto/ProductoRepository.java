@@ -21,6 +21,12 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     // SELECT count(*) > 0 FROM productos WHERE categoria_id = ?
     boolean existsByCategoriaId(Long categoriaId);
 
+    // PRACTICA: consultas derivadas que navegan la relacion con Proveedor
+    // SELECT count(*) > 0 FROM productos WHERE proveedor_id = ?
+    boolean existsByProveedorId(Long proveedorId);
+    // SELECT * FROM productos WHERE proveedor_id = ?
+    List<Producto> findByProveedorId(Long proveedorId);
+
     // SELECT * FROM productos WHERE nombre = ? LIMIT 1  (se usa al cargar los datos de ejemplo)
     Optional<Producto> findFirstByNombre(String nombre);
 

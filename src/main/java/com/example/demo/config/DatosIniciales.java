@@ -7,6 +7,8 @@ import com.example.demo.cliente.Cliente;                // Entidad Cliente
 import com.example.demo.cliente.ClienteRepository;      // Acceso a la tabla "clientes"
 import com.example.demo.producto.Producto;              // Entidad Producto
 import com.example.demo.producto.ProductoRepository;    // Acceso a la tabla "productos"
+import com.example.demo.proveedor.Proveedor;            // PRACTICA: entidad Proveedor
+import com.example.demo.proveedor.ProveedorRepository;  // PRACTICA: acceso a la tabla "proveedores"
 import org.springframework.boot.CommandLineRunner;      // Codigo que se ejecuta al arrancar la app
 import org.springframework.context.annotation.Bean;     // Registra un objeto administrado por Spring
 import org.springframework.context.annotation.Configuration; // Clase de configuracion
@@ -24,15 +26,32 @@ public class DatosIniciales {
     CommandLineRunner cargarDatos(CategoriaRepository categoriaRepo,
                                   ClienteRepository clienteRepo,
                                   ProductoRepository productoRepo,
+                                  ProveedorRepository proveedorRepo,   // PRACTICA
                                   TransactionTemplate tx) {
         return args -> {
             cargarCategorias(categoriaRepo);
+            cargarProveedores(proveedorRepo);                          // PRACTICA
             cargarClientes(clienteRepo);
             cargarProductos(productoRepo, categoriaRepo);
             // Los favoritos son LAZY: para leerlos y modificarlos la sesion de JPA debe seguir abierta.
             // tx.executeWithoutResult(...) ejecuta el bloque dentro de UNA transaccion.
             tx.executeWithoutResult(estado -> cargarFavoritos(clienteRepo, productoRepo));
         };
+    }
+
+    // ===================== PRACTICA · Datos de ejemplo: PROVEEDORES =====================
+    // Solo se insertan si la tabla esta vacia. No se asignan a los productos que ya existen:
+    // eso se hace desde la pagina /productos o con PUT /api/productos/{id}/proveedor/{proveedorId}
+    private void cargarProveedores(ProveedorRepository repo) {
+        if (repo.count() > 0) {  // SELECT count(*) FROM proveedores
+            return;
+        }
+        repo.saveAll(List.of(    // Orden de campos: id, nombre, email, telefono
+                new Proveedor(null, "TecnoMax", "ventas@tecnomax.com", "2222-1010"),
+                new Proveedor(null, "Distribuidora El Hogar", "pedidos@elhogar.com", "2222-2020"),
+                new Proveedor(null, "Deportes Total", "contacto@deportestotal.com", null)
+        ));
+        System.out.println(">>> Proveedores de ejemplo insertados: " + repo.count());
     }
 
     // ===================== Datos de ejemplo: CATEGORIAS =====================

@@ -5,6 +5,8 @@ import com.example.demo.categoria.Categoria;           // Entidad relacionada
 import com.example.demo.categoria.CategoriaRepository; // Para buscar la categoria por id
 import com.example.demo.cliente.Cliente;               // Entidad relacionada (favoritos)
 import com.example.demo.cliente.ClienteRepository;     // Para buscar los clientes que tienen el producto como favorito
+import com.example.demo.proveedor.Proveedor;           // PRACTICA: entidad relacionada
+import com.example.demo.proveedor.ProveedorRepository; // PRACTICA: para buscar el proveedor por id
 import jakarta.validation.Valid;                       // Activa las validaciones de la entidad (@NotBlank, etc.)
 import lombok.RequiredArgsConstructor;                 // Lombok: constructor para los campos "final"
 import org.springframework.http.ResponseEntity;        // Respuesta HTTP completa: codigo de estado + cuerpo
@@ -21,6 +23,7 @@ public class ProductoController {
     private final ProductoRepository repo;               // Acceso a la tabla "productos"
     private final CategoriaRepository categoriaRepo;     // Acceso a la tabla "categorias" (para la relacion)
     private final ClienteRepository clienteRepo;         // Acceso a la tabla "clientes" (para los favoritos)
+    private final ProveedorRepository proveedorRepo;     // PRACTICA: acceso a la tabla "proveedores"
 
     // ===================== READ: listar todos =====================
     @GetMapping("/listar")                 // GET /api/productos/listar
@@ -50,6 +53,16 @@ public class ProductoController {
                 return ResponseEntity.badRequest().body("No existe la categoria con id: " + categoriaId);
             }
             producto.setCategoria(categoria);                             // Enlazamos el producto con la categoria REAL de la BD
+        }
+
+        // PRACTICA: lo mismo para el proveedor  ->  { ..., "proveedor": { "id": 2 } }
+        if (producto.getProveedor() != null) {
+            Long proveedorId = producto.getProveedor().getId();
+            Proveedor proveedor = (proveedorId == null) ? null : proveedorRepo.findById(proveedorId).orElse(null);
+            if (proveedor == null) {
+                return ResponseEntity.badRequest().body("No existe el proveedor con id: " + proveedorId);
+            }
+            producto.setProveedor(proveedor);
         }
 
         Producto guardado = repo.save(producto);                          // INSERT INTO productos (..., categoria_id) VALUES (..., ?)
@@ -116,6 +129,38 @@ public class ProductoController {
         return repo.findById(id)
                 .map(p -> {
                     p.setCategoria(null);                      // UPDATE productos SET categoria_id = NULL WHERE id = ?
+                    return ResponseEntity.ok(repo.save(p));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // =====================================================================
+    //          PRACTICA: RELACION  Producto (muchos) -> Proveedor (uno)
+    //          (copia de los endpoints de categoria de arriba)
+    // =====================================================================
+
+    // ===================== Asignar (o cambiar) el proveedor de un producto =====================
+    @PutMapping("/{id}/proveedor/{proveedorId}")               // PUT /api/productos/1/proveedor/2
+    public ResponseEntity<?> asignarProveedor(@PathVariable Long id,
+                                              @PathVariable Long proveedorId) {
+        Producto producto = repo.findById(id).orElse(null);
+        if (producto == null) {
+            return ResponseEntity.status(404).body("No existe el producto con id: " + id);
+        }
+        Proveedor proveedor = proveedorRepo.findById(proveedorId).orElse(null);
+        if (proveedor == null) {
+            return ResponseEntity.status(404).body("No existe el proveedor con id: " + proveedorId);
+        }
+        producto.setProveedor(proveedor);              // UPDATE productos SET proveedor_id = ? WHERE id = ?
+        return ResponseEntity.ok(repo.save(producto));
+    }
+
+    // ===================== Quitar el proveedor de un producto =====================
+    @DeleteMapping("/{id}/proveedor")                          // DELETE /api/productos/1/proveedor
+    public ResponseEntity<Producto> quitarProveedor(@PathVariable Long id) {
+        return repo.findById(id)
+                .map(p -> {
+                    p.setProveedor(null);                      // UPDATE productos SET proveedor_id = NULL WHERE id = ?
                     return ResponseEntity.ok(repo.save(p));
                 })
                 .orElse(ResponseEntity.notFound().build());

@@ -48,6 +48,7 @@
                 <thead><tr><th>Página</th><th>Controller</th><th>Cómo obtiene los datos</th></tr></thead>
                 <tbody>
                 <tr><td><a th:href="@{/categorias}">/categorias</a></td><td>CategoriaVistaController</td><td>Model + th:each, formulario POST /categorias/guardar</td></tr>
+                <tr><td><a th:href="@{/proveedores}">/proveedores</a></td><td>ProveedorVistaController</td><td>Práctica: igual que categorías, POST /proveedores/guardar</td></tr>
                 <tr><td><a th:href="@{/productos}">/productos</a></td><td>ProductoVistaController</td><td>fetch() a <code>/api/productos/...</code> (GET, POST, PUT, DELETE)</td></tr>
                 <tr><td><a th:href="@{/relaciones}">/relaciones</a></td><td>RelacionVistaController</td><td>Consultas con JOIN FETCH + <code>/api/clientes/{id}/favoritos</code></td></tr>
                 <tr><td><a th:href="@{/reportes}">/reportes</a></td><td>ReporteController</td><td>Archivos: <code>/reportes/productos.xlsx</code> y <code>.pdf</code></td></tr>
