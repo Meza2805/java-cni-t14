@@ -41,7 +41,7 @@
 
                         <div class="mb-3">
                             <label class="form-label" for="telefono">Teléfono</label>
-                            <input class="form-control" th:field="*{telefono}" th:errorclass="is-invalid" maxlength="20">
+                            <input class="form-control" th:field="*{telefono}" th:errorclass="is-invalid" maxlength="8" minlength="8" pattern="[0-9]{8}">
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}">Error</div>
                         </div>
 

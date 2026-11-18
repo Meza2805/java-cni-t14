@@ -23,6 +23,7 @@ import java.util.Objects;
 //    al recargar la pagina no se envie el formulario dos veces.
 //  Compara con ProductoVistaController, donde la pagina usa los endpoints REST.
 @Controller
+
 @RequestMapping("/categorias")   // Prefijo de las paginas de categorias (la API sigue en /api/categorias)
 @RequiredArgsConstructor
 public class CategoriaVistaController {
