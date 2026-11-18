@@ -47,8 +47,8 @@ public class DatosIniciales {
             return;
         }
         repo.saveAll(List.of(    // Orden de campos: id, nombre, email, telefono
-                new Proveedor(null, "TecnoMax", "ventas@tecnomax.com", "2222-1010"),
-                new Proveedor(null, "Distribuidora El Hogar", "pedidos@elhogar.com", "2222-2020"),
+                new Proveedor(null, "TecnoMax", "ventas@tecnomax.com", "22221010"),
+                new Proveedor(null, "Distribuidora El Hogar", "pedidos@elhogar.com", "22222020"),
                 new Proveedor(null, "Deportes Total", "contacto@deportestotal.com", null)
         ));
         System.out.println(">>> Proveedores de ejemplo insertados: " + repo.count());

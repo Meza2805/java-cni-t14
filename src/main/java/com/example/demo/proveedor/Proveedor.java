@@ -55,7 +55,7 @@ public class Proveedor {
     @EqualsAndHashCode.Exclude  // Lombok: no incluirla en equals()/hashCode()
     private List<Producto> productos = new ArrayList<>();
 
-    // Constructor para crear proveedores sin productos: new Proveedor(null, "TecnoMax", "ventas@...", "2222-0000")
+    // Constructor para crear proveedores sin productos: new Proveedor(null, "TecnoMax", "ventas@...", "22220000")
     public Proveedor(Long id, String nombre, String email, String telefono) {
         this.id = id;
         this.nombre = nombre;
